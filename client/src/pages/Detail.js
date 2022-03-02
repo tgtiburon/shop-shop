@@ -5,20 +5,38 @@ import { useQuery } from '@apollo/client';
 import { QUERY_PRODUCTS } from '../utils/queries';
 import spinner from '../assets/spinner.gif';
 
+import { useStoreContext } from '../utils/GlobalState';
+import { UPDATE_PRODUCTS }  from '../utils/actions';
+
+
+
 function Detail() {
-  const { id } = useParams();
+  const [ state, dispatch ]  = useStoreContext();
+  const { id }  = useParams();
 
-  const [currentProduct, setCurrentProduct] = useState({});
+  const [ currentProduct, setCurrentProduct ] = useState({})  
 
-  const { loading, data } = useQuery(QUERY_PRODUCTS);
+  // querying data with Apollo
+  const { loading, data } = useQuery(QUERY_PRODUCTS)  ;
+  // destructuring products out of state
+  const { products }  = state;
 
-  const products = data?.products || [];
-
-  useEffect(() => {
+  // checks for data in the products array
+  // If there is no products in the global state (just loaded) 
+  // then we use useEffect to get the data from useQuery() hook 
+  // to set up product data and save it to the global state.
+  useEffect(()=> {
     if (products.length) {
-      setCurrentProduct(products.find((product) => product._id === id));
+      setCurrentProduct(products.find(product => product._id === id));
+    } else if (data) {
+      dispatch({ 
+          type: UPDATE_PRODUCTS,
+          products: data.products
+        });
     }
-  }, [products, id]);
+  }, [products, data, dispatch, id]);
+
+  
 
   return (
     <>
