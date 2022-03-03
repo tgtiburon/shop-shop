@@ -1,6 +1,7 @@
 import React from "react";
 import { UPDATE_CART_QUANTITY, REMOVE_FROM_CART } from "../../utils/actions";
 import { useStoreContext } from "../../utils/GlobalState";
+import { idbPromise } from "../../utils/helpers";
 
 const CartItem = ({ item }) => {
   // destructured dispatch() function from useStoreContext because
@@ -12,6 +13,7 @@ const CartItem = ({ item }) => {
       type: REMOVE_FROM_CART,
       _id: item._id,
     });
+    idbPromise('cart', 'delete', { ...item });
   };
 
   // use for up and down arrows on item count
@@ -24,12 +26,15 @@ const CartItem = ({ item }) => {
         type: REMOVE_FROM_CART,
         _id: item._id,
       });
+      // update IndexedDB
+      idbPromise('cart', 'delete', { ...item });
     } else {
       dispatch({
         type: UPDATE_CART_QUANTITY,
         _id: item._id,
         purchaseQuantity: parseInt(value),
       });
+      idbPromise('cart', 'put', { ...item,  purchaseQuantity: parseInt(value) });
     }
   };
 

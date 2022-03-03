@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { QUERY_CATEGORIES } from "../../utils/queries";
 import { useStoreContext } from "../../utils/GlobalState";
+import { idbPromise } from "../../utils/helpers";
 import {
   UPDATE_CATEGORIES,
   UPDATE_CURRENT_CATEGORY,
@@ -15,8 +16,8 @@ function CategoryMenu({}) {
   const [state, dispatch] = useStoreContext();
   // We only need categories array from state so destructure it from state
   const { categories } = state;
-  //
-  const { data: categoryData } = useQuery(QUERY_CATEGORIES);
+  // loading is so we can use IndexedDB
+  const { loading, data: categoryData } = useQuery(QUERY_CATEGORIES);
 
   // useEffect will run on load or when categoryData and dispatch change.
 
@@ -28,6 +29,18 @@ function CategoryMenu({}) {
       dispatch({
         type: UPDATE_CATEGORIES,
         categories: categoryData.categories,
+      });
+      categoryData.categories.forEach((category) => {
+        idbPromise("categories", "put", category);
+      });
+      // Offline
+    } else if (!loading) {
+
+      idbPromise('categories', 'get').then(categories => {
+        dispatch({ 
+          type:UPDATE_CATEGORIES,
+          categories: categories
+        });
       });
     }
     // watches catagoryData and dispatch
