@@ -21,12 +21,14 @@ const { Provider }  = StoreContext;
 // setup to accept props
 
 const StoreProvider = ({ value=[], ...props }) => {
-    // useProductReducer returnsd state and dispatch
+    // useProductReducer returned state and dispatch
     // state => most up-to-date version of global state object
     // dispatch => method we use to update our state.
     //          looks for an action object passed in as arg
     const [state, dispatch]  = useProductReducer({
         products: [],
+        cart: [],
+        cartOpen: false,
         categories: [],
         currentCategory: '',
     });
